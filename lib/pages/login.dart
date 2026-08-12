@@ -24,7 +24,7 @@ class _LoginState extends State<Login> {
       String email,
       String senha,
       ) async {
-    var url = Uri.http("10.112.4.33", "/api/login");
+    var url = Uri.http("10.112.4.154", "/api/login");
 
     try {
       var resposta = await http.post(

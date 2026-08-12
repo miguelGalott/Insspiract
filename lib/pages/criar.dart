@@ -121,7 +121,7 @@ class _CadastroState extends State<Cadastro> {
     }
 
 
-    var url = Uri.http("10.112.4.33", "/api/cadastro");
+    var url = Uri.http("10.112.4.154", "/api/cadastro");
 
     try {
       var resposta = await http.post(
@@ -198,7 +198,6 @@ class _CadastroState extends State<Cadastro> {
                 ),
                 const SizedBox(height: 20),
 
-                // Avatar da foto
                 Center(
                   child: GestureDetector(
                     onTap: _selecionarFotoDaGaleria,

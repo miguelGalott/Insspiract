@@ -33,8 +33,6 @@ class _ChatState extends State<Chat> {
     _abrirChat();
   }
 
-  // Ao abrir a tela: marca como visto tudo que o outro me mandou,
-  // e só DEPOIS carrega a lista (assim ela já vem atualizada).
   void _abrirChat() async {
     await AuthService.marcarComoVisto(widget.meuId, widget.idUsuarioDestino);
     _carregarMensagens();
@@ -71,7 +69,7 @@ class _ChatState extends State<Chat> {
   void _enviarMensagem() async {
     String conteudo = _mensagemController.text.trim();
 
-    // não deixa enviar mensagem totalmente vazia (sem texto E sem foto)
+
     if (conteudo.isEmpty && _fotoSelecionada == null) return;
 
     bool sucesso = await AuthService.cadastrarMensagem(
@@ -84,7 +82,7 @@ class _ChatState extends State<Chat> {
     if (sucesso) {
       _mensagemController.clear();
       setState(() {
-        _fotoSelecionada = null; // limpa a prévia depois de enviar
+        _fotoSelecionada = null;
       });
       _carregarMensagens();
     } else {
@@ -229,8 +227,7 @@ class _ChatState extends State<Chat> {
                                       color: Colors.white38,
                                     ),
                                   ),
-                                // O "vistinho" só faz sentido nas mensagens
-                                // que EU mandei (souEu == true)
+
                                 if (souEu) ...[
                                   const SizedBox(width: 4),
                                   Icon(
