@@ -3,6 +3,8 @@ import 'package:primeiro_app/servicos/AuthService.dart';
 import 'package:primeiro_app/servicos/preferencias_app.dart';
 import 'package:primeiro_app/servicos/Tema.dart';
 import 'package:primeiro_app/servicos/sessao.dart';
+import 'package:primeiro_app/pages/Professor/paginaProfessor.dart';
+import 'package:primeiro_app/pages/Secretaria/principalSecretaria.dart';
 import 'criar.dart';
 import 'esqueci_senha_dialog.dart';
 import 'package:http/http.dart' as http;
@@ -28,6 +30,26 @@ class _LoginState extends State<Login> {
     super.dispose();
   }
 
+  void _irParaHome(BuildContext context, String tipo, String id) {
+    final Widget? destino = switch (tipo) {
+      'PROFESSOR' => PaginaProfessor(meuId: id),
+      'SECRETARIA' => PrincipalSecretaria(meuId: id),
+      _ => null,
+    };
+
+    if (destino == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tipo de usuário desconhecido: $tipo')),
+      );
+      return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => destino),
+    );
+  }
+
   Future<void> autenticarServidor(
       BuildContext context,
       String email,
@@ -48,6 +70,7 @@ class _LoginState extends State<Login> {
       if (resposta.statusCode == 200) {
         final dados = jsonDecode(resposta.body);
         int idLogado = dados['id'];
+        String tipo = dados['tipo'];
         String? token = dados['token'];
 
         await Sessao.salvarUsuarioLogado(idLogado);
@@ -56,10 +79,7 @@ class _LoginState extends State<Login> {
         }
 
         if (!context.mounted) return;
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const Entrada()),
-        );
+        _irParaHome(context, tipo, idLogado.toString());
       } else if (resposta.statusCode == 400 || resposta.statusCode == 404) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -100,21 +120,19 @@ class _LoginState extends State<Login> {
       return;
     }
 
-    int? idLogado = await AuthService.validarLogin(usuarioDig, senhaDig);
+    final resultado = await AuthService.validarLogin(usuarioDig, senhaDig);
 
     if (!mounted) return;
     setState(() => _carregando = false);
 
-    if (idLogado != null) {
-      await Sessao.salvarUsuarioLogado(idLogado);
+    if (resultado != null) {
+      final int id = resultado['id'] as int;
+      final String tipo = resultado['tipo'] as String;
+
+      await Sessao.salvarUsuarioLogado(id);
 
       if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const Entrada(), // Fazer com que quando clicado ir para ou para o principal Secretaria ou princiaplProfessor
-        ),
-      );
+      _irParaHome(context, tipo, id.toString());
     } else {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

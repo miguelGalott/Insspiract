@@ -1,9 +1,3 @@
-// tema.dart
-// Cores e pedacinhos de UI compartilhados entre as telas do Insspiract,
-// pra não repetir a mesma paleta e o mesmo AppBar em cada arquivo.
-// Ajuste o caminho do import nos outros arquivos conforme a pasta
-// onde você salvar este arquivo no seu projeto.
-
 import 'package:flutter/material.dart';
 
 const Color corAzul = Color(0xFF004C94);
