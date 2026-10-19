@@ -10,6 +10,19 @@ import 'esqueci_senha_dialog.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+const Color corAzul = Color(0xFF004C94);
+const Color corAzulClaro = Color(0xFF2C7BC7);
+const Color corLaranja = Color(0xFFF7941D);
+const Color corLaranjaClaro = Color(0xFFFDC180);
+const Color corVerde = Color(0xFF1C9A55);
+const Color corVermelho = Color(0xFFD8484A);
+const Color corPapel = Color(0xFFF5F9FC);
+const Color corTinta = Color(0xFF0E2338);
+const Color corTintaSuave = Color(0xFF5B7188);
+const Color corLinha = Color(0xFFE3EAF1);
+const Color corAvisoFundo = Color(0xFFFFF1DE);
+const Color corAvisoTexto = Color(0xFF8A5306);
+
 class Login extends StatefulWidget {
   const Login({super.key});
 

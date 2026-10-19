@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:primeiro_app/servicos/Tema.dart';
+import 'package:primeiro_app/servicos/AuthService.dart';
 
 class EnviarAviso extends StatefulWidget {
-  const EnviarAviso({super.key});
+  final String meuId;
+
+  const EnviarAviso({super.key, required this.meuId});
 
   @override
   State<EnviarAviso> createState() => _EnviarAvisoState();
@@ -12,6 +15,7 @@ class _EnviarAvisoState extends State<EnviarAviso> {
   final TextEditingController controllerTitulo = TextEditingController();
   final TextEditingController controllerMensagem = TextEditingController();
 
+  bool _carregando = false;
   bool _enviado = false;
 
   @override
@@ -21,14 +25,34 @@ class _EnviarAvisoState extends State<EnviarAviso> {
     super.dispose();
   }
 
-  void _publicarAviso() {
+  void _publicarAviso() async {
     if (controllerTitulo.text.trim().isEmpty || controllerMensagem.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Preencha o título e a mensagem.')),
       );
       return;
     }
-    setState(() => _enviado = true);
+
+    setState(() => _carregando = true);
+
+    final sucesso = await AuthService.enviarAviso(
+      secreariaId: int.parse(widget.meuId),
+      titulo: controllerTitulo.text.trim(),
+      mensagem: controllerMensagem.text.trim(),
+    );
+
+    if (!mounted) return;
+    setState(() => _carregando = false);
+
+    if (sucesso) {
+      setState(() => _enviado = true);
+      controllerTitulo.clear();
+      controllerMensagem.clear();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível publicar agora. Tente de novo.')),
+      );
+    }
   }
 
   @override
@@ -85,13 +109,20 @@ class _EnviarAvisoState extends State<EnviarAviso> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _publicarAviso,
+                  onPressed: _carregando ? null : _publicarAviso,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: corLaranja,
+                    disabledBackgroundColor: corLaranjaClaro,
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
-                  child: const Text(
+                  child: _carregando
+                      ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                  )
+                      : const Text(
                     'Publicar aviso',
                     style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                   ),

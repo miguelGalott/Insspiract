@@ -12,7 +12,7 @@ class Cadastro extends StatefulWidget {
 }
 
 class _CadastroState extends State<Cadastro> {
-  // Campos comuns
+
   final TextEditingController controllerUsername = TextEditingController();
   final TextEditingController controllerNome = TextEditingController();
   final TextEditingController controllerEmail = TextEditingController();

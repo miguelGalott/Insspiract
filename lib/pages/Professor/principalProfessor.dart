@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:primeiro_app/servicos/gerenciador.dart';
-import 'package:primeiro_app/servicos/sessao.dart';
 import 'package:primeiro_app/servicos/Tema.dart';
+import 'package:primeiro_app/servicos/sessao.dart';
 import 'package:primeiro_app/pages/Professor/ReservarHorario.dart';
 import 'package:primeiro_app/pages/Professor/MeusAgendamentos.dart';
-import 'package:primeiro_app/pages/Professor/FilaEspera.dart';
 import 'package:primeiro_app/pages/Professor/Reclamacoes.dart';
 import 'package:primeiro_app/pages/Secretaria/ProfessoresChat.dart';
 import 'package:primeiro_app/pages/login.dart';
+
+const Color corAzul = Color(0xFF004C94);
+const Color corAzulClaro = Color(0xFF2C7BC7);
+const Color corLaranja = Color(0xFFF7941D);
+const Color corLaranjaClaro = Color(0xFFFDC180);
+const Color corVerde = Color(0xFF1C9A55);
+const Color corVermelho = Color(0xFFD8484A);
+const Color corPapel = Color(0xFFF5F9FC);
+const Color corTinta = Color(0xFF0E2338);
+const Color corTintaSuave = Color(0xFF5B7188);
+const Color corLinha = Color(0xFFE3EAF1);
+const Color corAvisoFundo = Color(0xFFFFF1DE);
+const Color corAvisoTexto = Color(0xFF8A5306);
+
 
 class PaginaProfessor extends StatefulWidget {
   final String meuId;
@@ -36,20 +48,12 @@ class _PaginaProfessorState extends State<PaginaProfessor> {
             children: [
               Text(
                 "Insspiract",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 4),
               Text(
                 'Área do Professor',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
-                  fontWeight: FontWeight.normal,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.normal),
               ),
             ],
           ),
@@ -85,9 +89,8 @@ class _PaginaProfessorState extends State<PaginaProfessor> {
               icon: Icons.calendar_today_rounded,
               title: 'Reservar horário',
               subtitle: 'Escolha um horário livre na Sala Inspira',
-              rf: 'RF14',
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ReservarHorario()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ReservarHorario(meuId: widget.meuId)));
               },
             ),
             _buildMenuCard(
@@ -95,9 +98,8 @@ class _PaginaProfessorState extends State<PaginaProfessor> {
               icon: Icons.assignment_outlined,
               title: 'Meus agendamentos',
               subtitle: 'Revise ou cancele suas reservas',
-              rf: 'RF08',
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const MeusAgendamentos()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => MeusAgendamentos(meuId: widget.meuId)));
               },
             ),
             _buildMenuCard(
@@ -105,9 +107,7 @@ class _PaginaProfessorState extends State<PaginaProfessor> {
               icon: Icons.forum_outlined,
               title: 'Negociar horário',
               subtitle: 'Troque um horário com outro professor',
-              rf: 'RF09',
               onTap: () {
-
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfessoresChat(perfil: 'professor')));
               },
             ),
@@ -116,9 +116,10 @@ class _PaginaProfessorState extends State<PaginaProfessor> {
               icon: Icons.people_outline_rounded,
               title: 'Fila de espera',
               subtitle: 'Veja sua posição após um cancelamento',
-              rf: 'RF10',
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const FilaEspera()));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Essa tela ainda está em construção.')),
+                );
               },
             ),
             _buildMenuCard(
@@ -126,9 +127,8 @@ class _PaginaProfessorState extends State<PaginaProfessor> {
               icon: Icons.warning_amber_rounded,
               title: 'Reclamação / pedido de item',
               subtitle: 'Relate um problema ou peça um recurso',
-              rf: 'RF07',
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const Reclamacoes()));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Reclamacoes(professorId: widget.meuId)));
               },
             ),
           ],
@@ -136,7 +136,6 @@ class _PaginaProfessorState extends State<PaginaProfessor> {
       ),
     );
   }
-
 
   Widget _buildHero() {
     return Container(
@@ -153,18 +152,11 @@ class _PaginaProfessorState extends State<PaginaProfessor> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Olá,',
-            style: TextStyle(color: Colors.white70, fontSize: 13),
-          ),
+          const Text('Olá,', style: TextStyle(color: Colors.white70, fontSize: 13)),
           const SizedBox(height: 2),
           const Text(
             'Professor(a)',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 14),
           Container(
@@ -180,19 +172,12 @@ class _PaginaProfessorState extends State<PaginaProfessor> {
                 Container(
                   width: 7,
                   height: 7,
-                  decoration: const BoxDecoration(
-                    color: corVerde,
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: const BoxDecoration(color: corVerde, shape: BoxShape.circle),
                 ),
                 const SizedBox(width: 7),
                 const Text(
                   'Sala Inspira livre agora',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -202,13 +187,11 @@ class _PaginaProfessorState extends State<PaginaProfessor> {
     );
   }
 
-
   Widget _buildMenuCard({
     required BuildContext context,
     required IconData icon,
     required String title,
     required String subtitle,
-    required String rf,
     required VoidCallback onTap,
   }) {
     return Padding(
@@ -242,49 +225,19 @@ class _PaginaProfessorState extends State<PaginaProfessor> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              title,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0E2338),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEAF2FA),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              rf,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: corAzul,
-                              ),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        title,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0E2338)),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         subtitle,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF5B7188),
-                        ),
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF5B7188)),
                       ),
                     ],
                   ),
                 ),
+                const Icon(Icons.chevron_right_rounded, color: Color(0xFFB7C4D1)),
               ],
             ),
           ),

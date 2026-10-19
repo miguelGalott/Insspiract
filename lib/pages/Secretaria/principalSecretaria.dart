@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:primeiro_app/servicos/gerenciador.dart';
-import 'package:primeiro_app/servicos/Tema.dart';
 import 'package:primeiro_app/servicos/sessao.dart';
+import 'package:primeiro_app/servicos/AuthService.dart';
 import 'package:primeiro_app/pages/Secretaria/ValidarCadastro.dart';
 import 'package:primeiro_app/pages/Secretaria/EnviarAviso.dart';
 import 'package:primeiro_app/pages/Secretaria/GerenciarReserva.dart';
 import 'package:primeiro_app/pages/Secretaria/RelatorioUso.dart';
 import 'package:primeiro_app/pages/login.dart';
+
+const Color corAzul = Color(0xFF004C94);
+const Color corAzulClaro = Color(0xFF2C7BC7);
+const Color corLaranja = Color(0xFFF7941D);
+const Color corLaranjaClaro = Color(0xFFFDC180);
+const Color corVerde = Color(0xFF1C9A55);
+const Color corVermelho = Color(0xFFD8484A);
+const Color corPapel = Color(0xFFF5F9FC);
+const Color corTinta = Color(0xFF0E2338);
+const Color corTintaSuave = Color(0xFF5B7188);
+const Color corLinha = Color(0xFFE3EAF1);
+const Color corAvisoFundo = Color(0xFFFFF1DE);
+const Color corAvisoTexto = Color(0xFF8A5306);
 
 class PrincipalSecretaria extends StatefulWidget {
   final String meuId;
@@ -18,6 +30,18 @@ class PrincipalSecretaria extends StatefulWidget {
 }
 
 class _PrincipalSecretariaState extends State<PrincipalSecretaria> {
+  late Future<int> _futurePendentes;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarPendentes();
+  }
+
+  void _carregarPendentes() {
+    _futurePendentes = AuthService.listarCadastrosPendentes().then((lista) => lista.length);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,20 +59,12 @@ class _PrincipalSecretariaState extends State<PrincipalSecretaria> {
             children: [
               Text(
                 "Insspiract",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 4),
               Text(
                 'Área da Secretaria',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
-                  fontWeight: FontWeight.normal,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.normal),
               ),
             ],
           ),
@@ -74,62 +90,66 @@ class _PrincipalSecretariaState extends State<PrincipalSecretaria> {
         ),
       ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _buildHero(),
-            const SizedBox(height: 16),
-            _buildMenuCard(
-              context: context,
-              icon: Icons.how_to_reg_outlined,
-              title: 'Validar cadastro',
-              subtitle: 'Aprove solicitações de conta',
-              rf: 'RF01 · RF04',
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ValidarCadastro()));
-              },
-            ),
-            _buildMenuCard(
-              context: context,
-              icon: Icons.campaign_outlined,
-              title: 'Enviar aviso',
-              subtitle: 'Comunique os professores',
-              rf: 'RF03',
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const EnviarAviso()));
-              },
-            ),
-            _buildMenuCard(
-              context: context,
-              icon: Icons.event_available_outlined,
-              title: 'Gerenciar reservas',
-              subtitle: 'Confirmar e desmarcar agendamentos',
-              rf: 'RF05 · RF14',
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const GerenciarReservas()));
-              },
-            ),
-            _buildMenuCard(
-              context: context,
-              icon: Icons.forum_outlined,
-              title: 'Responder solicitações',
-              subtitle: 'Veja pedidos e reclamações recebidos',
-              rf: 'RF06',
-              onTap: () {
-
-              },
-            ),
-            _buildMenuCard(
-              context: context,
-              icon: Icons.bar_chart_rounded,
-              title: 'Relatório de uso',
-              subtitle: 'Reservas, cancelamentos e reclamações',
-              rf: 'RF13',
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const RelatorioUso()));
-              },
-            ),
-          ],
+        child: RefreshIndicator(
+          onRefresh: () async {
+            setState(_carregarPendentes);
+          },
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _buildHero(),
+              const SizedBox(height: 16),
+              _buildMenuCard(
+                context: context,
+                icon: Icons.how_to_reg_outlined,
+                title: 'Validar cadastro',
+                subtitle: 'Aprove solicitações de conta',
+                onTap: () async {
+                  await Navigator.push(context, MaterialPageRoute(builder: (context) => const ValidarCadastro()));
+                  if (!context.mounted) return;
+                  setState(_carregarPendentes);
+                },
+              ),
+              _buildMenuCard(
+                context: context,
+                icon: Icons.campaign_outlined,
+                title: 'Enviar aviso',
+                subtitle: 'Comunique os professores',
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => EnviarAviso(meuId: widget.meuId)));
+                },
+              ),
+              _buildMenuCard(
+                context: context,
+                icon: Icons.event_available_outlined,
+                title: 'Gerenciar reservas',
+                subtitle: 'Confirmar e desmarcar agendamentos',
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => GerenciarReservas(meuId: widget.meuId)));
+                },
+              ),
+              _buildMenuCard(
+                context: context,
+                icon: Icons.forum_outlined,
+                title: 'Responder solicitações',
+                subtitle: 'Veja pedidos e reclamações recebidos',
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Essa tela ainda está em construção.')),
+                  );
+                },
+              ),
+              _buildMenuCard(
+                context: context,
+                icon: Icons.bar_chart_rounded,
+                title: 'Relatório de uso',
+                subtitle: 'Reservas, cancelamentos e reclamações',
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const RelatorioUso()));
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -150,49 +170,50 @@ class _PrincipalSecretariaState extends State<PrincipalSecretaria> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Olá,',
-            style: TextStyle(color: Colors.white70, fontSize: 13),
-          ),
+          const Text('Olá,', style: TextStyle(color: Colors.white70, fontSize: 13)),
           const SizedBox(height: 2),
           const Text(
             'Secretário(a)',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.22),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: Colors.white.withOpacity(0.4)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 7,
-                  height: 7,
-                  decoration: const BoxDecoration(
-                    color: corVerde,
-                    shape: BoxShape.circle,
-                  ),
+          FutureBuilder<int>(
+            future: _futurePendentes,
+            builder: (context, snapshot) {
+              final total = snapshot.data;
+              final texto = total == null
+                  ? 'Carregando...'
+                  : total == 0
+                  ? 'Nenhum cadastro pendente'
+                  : '$total cadastro${total == 1 ? '' : 's'} pendente${total == 1 ? '' : 's'}';
+
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.22),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: Colors.white.withOpacity(0.4)),
                 ),
-                const SizedBox(width: 7),
-                const Text(
-                  'Pedidos pendentes',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: (total ?? 0) > 0 ? corLaranja : corVerde,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 7),
+                    Text(
+                      texto,
+                      style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ],
       ),
@@ -204,7 +225,6 @@ class _PrincipalSecretariaState extends State<PrincipalSecretaria> {
     required IconData icon,
     required String title,
     required String subtitle,
-    required String rf,
     required VoidCallback onTap,
   }) {
     return Padding(
@@ -238,49 +258,19 @@ class _PrincipalSecretariaState extends State<PrincipalSecretaria> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              title,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF0E2338),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 7,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFEAF2FA),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              rf,
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: corAzul,
-                              ),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        title,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0E2338)),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         subtitle,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF5B7188),
-                        ),
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF5B7188)),
                       ),
                     ],
                   ),
                 ),
+                const Icon(Icons.chevron_right_rounded, color: Color(0xFFB7C4D1)),
               ],
             ),
           ),
