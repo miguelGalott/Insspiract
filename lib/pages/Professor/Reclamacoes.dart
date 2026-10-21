@@ -1,35 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:primeiro_app/servicos/Tema.dart';
+import 'package:primeiro_app/servicos/AuthService.dart';
 
 class Reclamacoes extends StatefulWidget {
-  const Reclamacoes({super.key});
+  final String professorId;
+
+  const Reclamacoes({super.key, required this.professorId});
 
   @override
   State<Reclamacoes> createState() => _ReclamacoesState();
 }
 
 class _ReclamacoesState extends State<Reclamacoes> {
-  final TextEditingController controllerNome = TextEditingController();
-  final List<String> opcoes = ['Reclamação sobre a sala', 'Pedido de item', 'Sugestão'];
-  String? opcaoSelecionada;
+  final TextEditingController controllerDescricao = TextEditingController();
 
+
+
+
+  final Map<String, String> opcoes = {
+    'RECLAMACAO': 'Reclamação sobre a sala',
+    'PEDIDO': 'Pedido de item',
+  };
+  String? tipoSelecionado;
+
+  bool _carregando = false;
   bool _enviado = false;
 
   @override
   void dispose() {
-    controllerNome.dispose();
+    controllerDescricao.dispose();
     super.dispose();
   }
 
-  void _enviarCadastro() {
-    setState(() => _enviado = true);
+  void _enviarSolicitacao() async {
+    if (tipoSelecionado == null || controllerDescricao.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Escolha o tipo e descreva o que está acontecendo.')),
+      );
+      return;
+    }
+
+    setState(() => _carregando = true);
+
+    final sucesso = await AuthService.enviarSolicitacao(
+      professorId: int.parse(widget.professorId),
+      tipo: tipoSelecionado!,
+      descricao: controllerDescricao.text.trim(),
+    );
+
+    if (!mounted) return;
+    setState(() => _carregando = false);
+
+    if (sucesso) {
+      setState(() => _enviado = true);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível enviar agora. Tente de novo em instantes.')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: corPapel,
-      extendBodyBehindAppBar: false,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(64),
         child: AppBar(
@@ -52,7 +86,10 @@ class _ReclamacoesState extends State<Reclamacoes> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _cabecalho(),
+              const Text(
+                'Reclamações e pedidos',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: corTinta),
+              ),
               const SizedBox(height: 20),
               _rotulo('Tipo'),
               const SizedBox(height: 8),
@@ -61,7 +98,7 @@ class _ReclamacoesState extends State<Reclamacoes> {
               _rotulo('Descrição'),
               const SizedBox(height: 8),
               _campoTexto(
-                controller: controllerNome,
+                controller: controllerDescricao,
                 dica: 'Descreva o ocorrido com o máximo de detalhes possível',
               ),
               const SizedBox(height: 24),
@@ -77,32 +114,10 @@ class _ReclamacoesState extends State<Reclamacoes> {
     );
   }
 
-  Widget _cabecalho() {
-    return const Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Reclamações e pedidos',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: corTinta,
-          ),
-        ),
-        SizedBox(height: 2),
-      ],
-    );
-  }
-
   Widget _rotulo(String texto) {
     return Text(
       texto,
-      style: const TextStyle(
-        fontSize: 12.5,
-        fontWeight: FontWeight.w700,
-        color: corTintaSuave,
-        letterSpacing: .2,
-      ),
+      style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: corTintaSuave, letterSpacing: .2),
     );
   }
 
@@ -117,33 +132,27 @@ class _ReclamacoesState extends State<Reclamacoes> {
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
-          value: opcaoSelecionada,
+          value: tipoSelecionado,
           isExpanded: true,
           icon: const Icon(Icons.keyboard_arrow_down_rounded, color: corTintaSuave),
-          hint: const Text(
-            'Selecione uma opção',
-            style: TextStyle(color: Color(0xFFAFC0D0), fontSize: 13.5),
-          ),
+          hint: const Text('Selecione uma opção', style: TextStyle(color: Color(0xFFAFC0D0), fontSize: 13.5)),
           style: const TextStyle(color: corTinta, fontSize: 14, fontWeight: FontWeight.w600),
           borderRadius: BorderRadius.circular(14),
-          items: opcoes.map((valor) {
+          items: opcoes.entries.map((entrada) {
             return DropdownMenuItem<String>(
-              value: valor,
-              child: Text(valor),
+              value: entrada.key,
+              child: Text(entrada.value),
+
+
             );
           }).toList(),
-          onChanged: (novoValor) {
-            setState(() => opcaoSelecionada = novoValor);
-          },
+          onChanged: (novoValor) => setState(() => tipoSelecionado = novoValor),
         ),
       ),
     );
   }
 
-  Widget _campoTexto({
-    required TextEditingController controller,
-    required String dica,
-  }) {
+  Widget _campoTexto({required TextEditingController controller, required String dica}) {
     return TextField(
       keyboardType: TextInputType.multiline,
       minLines: 4,
@@ -156,18 +165,9 @@ class _ReclamacoesState extends State<Reclamacoes> {
         hintText: dica,
         hintStyle: const TextStyle(color: Color(0xFFAFC0D0)),
         contentPadding: const EdgeInsets.all(14),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: corLinha, width: 1.4),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: corLinha, width: 1.4),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: corAzulClaro, width: 1.8),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: corLinha, width: 1.4)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: corLinha, width: 1.4)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: corAzulClaro, width: 1.8)),
       ),
     );
   }
@@ -177,28 +177,26 @@ class _ReclamacoesState extends State<Reclamacoes> {
       width: double.infinity,
       height: 52,
       child: ElevatedButton(
-        onPressed: _enviarCadastro,
+        onPressed: _carregando ? null : _enviarSolicitacao,
         style: ElevatedButton.styleFrom(
           backgroundColor: corLaranja,
+          disabledBackgroundColor: corLaranjaClaro,
           foregroundColor: Colors.white,
           elevation: 0,
-          shadowColor: corLaranja.withOpacity(.4),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ).copyWith(
-          elevation: WidgetStateProperty.resolveWith((states) =>
-          states.contains(WidgetState.pressed) ? 0 : 6),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
-        child: const Row(
+        child: _carregando
+            ? const SizedBox(
+          width: 22,
+          height: 22,
+          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+        )
+            : const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.send_rounded, size: 18, color: Colors.white),
             SizedBox(width: 8),
-            Text(
-              'Enviar',
-              style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700),
-            ),
+            Text('Enviar', style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700)),
           ],
         ),
       ),
