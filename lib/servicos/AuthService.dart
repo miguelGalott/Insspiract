@@ -43,9 +43,9 @@ class AuthService {
   }
 
   static Future<Map<String, dynamic>?> validarLogin(
-    String usuario,
-    String senha,
-  ) async {
+      String usuario,
+      String senha,
+      ) async {
     final db = await ConexaoSqflite.obterConexao();
 
     final resultado = await db.rawQuery(
@@ -113,8 +113,8 @@ class AuthService {
 
     return db.rawQuery(
       '''
-    SELECTILA_ FILA_ESPERA.PROFESSOR_ID, FILA_ESPERA.POSICAO, FILA_ESPERA.ESTADO, USUARIO.NOME
-    FROM FESPERA
+    SELECT FILA_ESPERA.PROFESSOR_ID, FILA_ESPERA.POSICAO, FILA_ESPERA.ESTADO, USUARIO.NOME
+    FROM FILA_ESPERA
     JOIN USUARIO ON USUARIO.ID = FILA_ESPERA.PROFESSOR_ID
     WHERE FILA_ESPERA.RESERVA_ID = ?
     ORDER BY FILA_ESPERA.POSICAO ASC
@@ -124,8 +124,8 @@ class AuthService {
   }
 
   static Future<List<Map<String, dynamic>>> listarAgendamentos(
-    int professorId,
-  ) async {
+      int professorId,
+      ) async {
     final db = await ConexaoSqflite.obterConexao();
 
     return db.rawQuery(
@@ -149,8 +149,8 @@ class AuthService {
     final db = await ConexaoSqflite.obterConexao();
     try{
 
-      await db.rawUpdate("UPDATE RESERVAS SET ESTADO = 'CANCELADA' WHERE ID = ? "[reservaId]);
-    return true;
+      await db.rawUpdate("UPDATE RESERVAS SET ESTADO = 'CANCELADA' WHERE ID = ?", [reservaId]);
+      return true;
     }
     catch (e){
       print('Erro ao cancelar reserva: $e');
@@ -158,7 +158,7 @@ class AuthService {
     }
   }
   static Future<bool> enviarAviso({
-    required int secreariaId,
+    required int secretariaId,
     required String titulo,
     required String mensagem,
   }) async {
@@ -167,8 +167,8 @@ class AuthService {
     try {
       await db.transaction((txn) async {
         await txn.rawInsert(
-          'INSERT INTO AVISO (SECRETARIA_ID, TITULO, DESCRICAO) VALUES (?, ?, ?)',
-          [secreariaId, titulo, mensagem],
+          'INSERT INTO AVISO (SECRETARIA_ID, TITULO, MENSAGEM) VALUES (?, ?, ?)',
+          [secretariaId, titulo, mensagem],
         );
       });
       return true;
@@ -312,7 +312,7 @@ class AuthService {
 
 
 
- // Para fazer o Grafico
+
   static Future<List<Map<String, dynamic>>> relatorioDeUso() async {
     final db = await ConexaoSqflite.obterConexao();
 
@@ -422,6 +422,4 @@ class AuthService {
       return false;
     }
   }
-
 }
-

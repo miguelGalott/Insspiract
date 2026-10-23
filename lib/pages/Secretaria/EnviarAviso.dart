@@ -36,7 +36,7 @@ class _EnviarAvisoState extends State<EnviarAviso> {
     setState(() => _carregando = true);
 
     final sucesso = await AuthService.enviarAviso(
-      secreariaId: int.parse(widget.meuId),
+      secretariaId: int.parse(widget.meuId),
       titulo: controllerTitulo.text.trim(),
       mensagem: controllerMensagem.text.trim(),
     );
